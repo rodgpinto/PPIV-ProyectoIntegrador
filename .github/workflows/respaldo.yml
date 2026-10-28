@@ -1,0 +1,34 @@
+# Copia de seguridad diaria de la base (Neon) guardada fuera de Render, gratis, como archivo adjunto de esta ejecución.
+# Guía en docs/RENDER.md. Necesita un secreto del repositorio llamado DATABASE_URL (Settings > Secrets and variables > Actions).
+# Sin probar en el entorno donde se armó el proyecto.
+name: Copia de seguridad de RADAS
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # 06:17 UTC = 03:17 en Buenos Aires, cuando el bar ya cerró
+  workflow_dispatch:        # permite correrla a mano desde la pestaña Actions
+
+jobs:
+  copia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Instalar solo lo necesario (el driver de PostgreSQL)
+        run: npm install --omit=dev --no-audit --no-fund
+      - name: Crear la copia
+        run: node scripts/respaldo.js crear
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RESPALDO_DIR: respaldos
+          RESPALDO_CADA_HORAS: '0'
+      - name: Guardar la copia (se conserva 90 días)
+        uses: actions/upload-artifact@v4
+        with:
+          name: radas-copia-${{ github.run_id }}
+          path: respaldos/*.json.gz
+          retention-days: 90
+          if-no-files-found: error

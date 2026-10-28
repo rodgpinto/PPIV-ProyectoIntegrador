@@ -1,0 +1,48 @@
+# PRODUCCIÓN: app + PostgreSQL + Caddy (HTTPS automático con certificado gratis de Let's Encrypt).
+# Pasos completos en docs/DESPLIEGUE.md. Sin probar en el entorno donde se armó (no había Docker).
+#   cp .env.example .env     → completar DB_PASSWORD, ADMIN_EMAIL, ADMIN_PASSWORD, DOMINIO
+#   mkdir respaldos && sudo chown 1000:1000 respaldos      (el usuario del contenedor es el 1000)
+#   docker compose -f docker-compose.prod.yml up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: radas
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en el .env}
+      POSTGRES_DB: radas
+    command: ["postgres", "-c", "max_connections=20", "-c", "shared_buffers=64MB"]
+    volumes: [datos:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radas"]
+      interval: 10s
+      retries: 10
+    # la base NO se publica hacia afuera: solo la app la alcanza por la red interna
+  app:
+    build: .
+    restart: always
+    depends_on:
+      db: { condition: service_healthy }
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://radas:${DB_PASSWORD}@db:5432/radas
+      TRUST_PROXY: "1"
+    # las copias quedan en la carpeta ./respaldos del servidor, donde las puede ver y subir afuera cualquier programa del equipo
+    volumes: ["./respaldos:/datos/respaldos"]
+    # la app tampoco se publica: entra todo por Caddy
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    depends_on: [app]
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMINIO: ${DOMINIO:?Falta DOMINIO en el .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_datos:/data
+      - caddy_config:/config
+volumes:
+  datos:
+  caddy_datos:
+  caddy_config:
