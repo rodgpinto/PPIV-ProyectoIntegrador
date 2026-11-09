@@ -1,0 +1,306 @@
+<title>Facturación RADAS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Concepto: un plano de instalación. Dos actores de colores distintos (RADAS en terracota, ARCA en verde azulado) y una secuencia que se lee de arriba hacia abajo. */
+:root {
+  --bg: #f1f4f5; --panel: #ffffff; --fg: #14232b; --muted: #55666e; --line: #cdd7db;
+  --radas: #b8452a; --arca: #0f6e7a; --ok: #1c7a4a; --bad: #b3261e; --warn: #8a5a00;
+  --radas-soft: #f6e4de; --arca-soft: #dcedf0;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1b21; --panel: #16262e; --fg: #e6edf0; --muted: #9db0b8; --line: #2c424c;
+    --radas: #ec8864; --arca: #4cc0cc; --ok: #52c78a; --bad: #ff8a80; --warn: #e3b04b;
+    --radas-soft: #3a2420; --arca-soft: #17353b; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1b21; --panel: #16262e; --fg: #e6edf0; --muted: #9db0b8; --line: #2c424c;
+  --radas: #ec8864; --arca: #4cc0cc; --ok: #52c78a; --bad: #ff8a80; --warn: #e3b04b;
+  --radas-soft: #3a2420; --arca-soft: #17353b; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 15px/1.6 var(--sans); padding-block: 2rem 4rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 980px; margin: 0 auto; display: grid; gap: 2.5rem; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); font-weight: 600; letter-spacing: -.01em; }
+h2 { font-size: 1.3rem; font-weight: 600; }
+h3 { font-size: 1rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: .88em; }
+a { color: var(--arca); }
+.eyebrow { font: 500 .75rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--radas); }
+header { display: grid; gap: .8rem; }
+.lede { font-size: 1.1rem; color: var(--muted); }
+.aviso { border: 1px solid var(--line); border-left: 4px solid var(--warn); background: var(--panel); padding: .9rem 1.1rem; border-radius: 6px; display: grid; gap: .3rem; }
+.aviso b { color: var(--warn); }
+section { display: grid; gap: 1rem; min-width: 0; }
+.sub { color: var(--muted); }
+
+/* alta previa */
+.pasos { list-style: none; counter-reset: p; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .8rem; }
+.pasos li { counter-increment: p; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--arca); border-radius: 6px; padding: .8rem .9rem; display: grid; gap: .25rem; align-content: start; min-width: 0; }
+.pasos li::before { content: "Paso " counter(p); font: 500 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.pasos small { color: var(--muted); font-size: .82rem; line-height: 1.45; }
+
+/* diagrama */
+figure { margin: 0; display: grid; gap: .6rem; min-width: 0; }
+.lienzo { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.lienzo svg { display: block; width: 100%; min-width: 760px; height: auto; }
+figcaption { color: var(--muted); font-size: .88rem; max-width: 72ch; }
+svg text { font-family: var(--sans); fill: var(--fg); }
+svg .t-m { font-family: var(--mono); font-size: 12.5px; font-weight: 500; }
+svg .t-d { font-size: 11.5px; fill: var(--muted); }
+svg .halo { stroke: var(--panel); stroke-width: 5px; paint-order: stroke; stroke-linejoin: round; }
+svg .vida { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 5; }
+svg .flecha { stroke: var(--fg); stroke-width: 1.5; fill: none; }
+svg .resp { stroke-dasharray: 6 4; }
+svg .punta { fill: var(--fg); }
+svg .marco { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 4; }
+svg .t-marco { font: 500 10.5px var(--mono); letter-spacing: .08em; fill: var(--muted); }
+svg .carril-r rect { fill: var(--radas-soft); stroke: var(--radas); }
+svg .carril-a rect { fill: var(--arca-soft); stroke: var(--arca); }
+svg .carril-r rect, svg .carril-a rect { stroke-width: 1.5; }
+svg .carril-r text { fill: var(--radas); font-weight: 600; font-size: 12.5px; }
+svg .carril-a text { fill: var(--arca); font-weight: 600; font-size: 12.5px; }
+svg .nota rect { fill: var(--radas-soft); stroke: var(--radas); stroke-width: 1.2; }
+svg .nota text { font-size: 12px; }
+svg .num circle { fill: var(--fg); }
+svg .num text { fill: var(--bg); font: 600 10.5px var(--sans); }
+
+/* fallas */
+.tres { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .8rem; }
+.caso { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: .9rem 1rem; display: grid; gap: .35rem; align-content: start; min-width: 0; }
+.caso .res { font: 500 .75rem var(--mono); letter-spacing: .06em; }
+.res.ok { color: var(--ok); } .res.mal { color: var(--bad); } .res.dud { color: var(--warn); }
+.caso p { font-size: .9rem; color: var(--muted); }
+.caso p b { color: var(--fg); font-weight: 600; }
+
+/* tablas */
+.tabla { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.mono { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.dos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.2rem; align-items: start; }
+.dos > * { min-width: 0; }
+.qr { font-family: var(--mono); font-size: .8rem; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: .8rem 1rem; overflow-x: auto; white-space: pre; line-height: 1.55; }
+.tag { display: inline-block; font: 500 .7rem var(--mono); padding: .05rem .4rem; border-radius: 3px; border: 1px solid currentColor; letter-spacing: .04em; }
+.tag.r { color: var(--radas); } .tag.a { color: var(--arca); }
+ul.lista { margin: 0; padding-left: 1.1rem; display: grid; gap: .35rem; max-width: 68ch; }
+footer { color: var(--muted); font-size: .85rem; display: grid; gap: .4rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+footer ul { margin: 0; padding-left: 1.1rem; display: grid; gap: .2rem; }
+</style>
+
+<main>
+  <header>
+    <span class="eyebrow">RADAS · Rooftop bar, Puerto Madero · Diseño, no implementado</span>
+    <h1>Facturación electrónica</h1>
+    <p class="lede">Cómo se conectaría RADAS con ARCA (ex AFIP) para emitir una factura al cobrar una cuenta: quién habla con quién, en qué orden y qué se guarda.</p>
+    <div class="aviso">
+      <p><b>Es un diseño para el proyecto.</b> El bar es ficticio: no tiene CUIT, certificado ni punto de venta, así que el sistema <b>no emite comprobantes</b> y nada de lo que se muestra acá tiene valor fiscal. Los nombres de servicios, métodos, campos y direcciones salen de la documentación pública de ARCA (fuentes al final).</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-alta">
+    <h2 id="h-alta">Antes de poder facturar (una sola vez)</h2>
+    <p class="sub">Lo hace el titular del CUIT desde la web de ARCA. Se repite para el ambiente de prueba (homologación) y para el real (producción).</p>
+    <ol class="pasos">
+      <li><h3>Clave Fiscal</h3><small>Del CUIT que factura, con el servicio de certificados habilitado.</small></li>
+      <li><h3>Certificado digital</h3><small>Se genera un par de claves propio y ARCA firma el certificado. En prueba: WSASS. En producción: «Administrador de Certificados Digitales».</small></li>
+      <li><h3>Asociarlo al servicio <code>wsfe</code></h3><small>El certificado debe quedar autorizado para el servicio de factura electrónica, en WSASS (prueba) o «Administrador de Relaciones de Clave Fiscal» (producción).</small></li>
+      <li><h3>Punto de venta</h3><small>Un punto de venta habilitado para facturar por web services. Su número viaja en cada comprobante.</small></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-flujo">
+    <h2 id="h-flujo">Qué pasa al cobrar una cuenta con factura</h2>
+    <figure>
+      <div class="lienzo" role="region" aria-label="Diagrama de secuencia, se desplaza horizontalmente en pantallas chicas" tabindex="0">
+        <svg viewBox="0 0 900 650" role="img" aria-label="Diagrama de secuencia: la caja pide facturar al servidor de RADAS; si no hay ticket vigente el servidor lo pide al WSAA; consulta el último número autorizado, solicita el CAE al WSFEv1, guarda el comprobante con su QR y devuelve el ticket a la caja.">
+          <defs>
+            <marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="punta"/></marker>
+          </defs>
+
+          <!-- carriles -->
+          <line class="vida" x1="100" y1="52" x2="100" y2="640"/>
+          <line class="vida" x1="330" y1="52" x2="330" y2="640"/>
+          <line class="vida" x1="580" y1="52" x2="580" y2="640"/>
+          <line class="vida" x1="810" y1="52" x2="810" y2="640"/>
+          <g class="carril-r"><rect x="25" y="8" width="150" height="42" rx="6"/><text x="100" y="26" text-anchor="middle">Caja</text><text x="100" y="42" text-anchor="middle" class="t-d">tablet del cajero</text></g>
+          <g class="carril-r"><rect x="250" y="8" width="160" height="42" rx="6"/><text x="330" y="26" text-anchor="middle">Servidor RADAS</text><text x="330" y="42" text-anchor="middle" class="t-d">app + base de datos</text></g>
+          <g class="carril-a"><rect x="488" y="8" width="184" height="42" rx="6"/><text x="580" y="26" text-anchor="middle">WSAA</text><text x="580" y="42" text-anchor="middle" class="t-d">autenticación de ARCA</text></g>
+          <g class="carril-a"><rect x="735" y="8" width="150" height="42" rx="6"/><text x="810" y="26" text-anchor="middle">WSFEv1</text><text x="810" y="42" text-anchor="middle" class="t-d">factura electrónica</text></g>
+
+          <!-- marco: solo si el ticket venció -->
+          <rect class="marco" x="236" y="128" width="430" height="140" rx="6"/>
+          <text class="t-marco" x="248" y="146">SOLO SI NO HAY TICKET VIGENTE</text>
+
+          <!-- 1 -->
+          <g class="num"><circle cx="76" cy="100" r="9"/><text x="76" y="104" text-anchor="middle">1</text></g>
+          <line class="flecha" x1="100" y1="100" x2="326" y2="100" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="215" y="80" text-anchor="middle" dx="14">Cobrar con factura</text>
+          <text class="t-d halo" x="215" y="94" text-anchor="middle">tipo de comprobante y datos del cliente</text>
+
+          <!-- 2 -->
+          <g class="num"><circle cx="348" cy="174" r="9"/><text x="348" y="178" text-anchor="middle">2</text></g>
+          <line class="flecha" x1="330" y1="200" x2="576" y2="200" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="463" y="180" text-anchor="middle" dx="14">LoginCms</text>
+          <text class="t-d halo" x="463" y="194" text-anchor="middle">pedido firmado · service = wsfe</text>
+
+          <!-- 3 -->
+          <line class="flecha resp" x1="580" y1="248" x2="334" y2="248" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="463" y="228" text-anchor="middle">Token + Sign</text>
+          <text class="t-d halo" x="463" y="242" text-anchor="middle">valen 12 horas: se guardan y se reutilizan</text>
+
+          <!-- 4 -->
+          <g class="num"><circle cx="348" cy="294" r="9"/><text x="348" y="298" text-anchor="middle">3</text></g>
+          <line class="flecha" x1="330" y1="320" x2="806" y2="320" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="570" y="300" text-anchor="middle">FECompUltimoAutorizado</text>
+          <text class="t-d halo" x="570" y="314" text-anchor="middle">punto de venta + tipo de comprobante</text>
+
+          <line class="flecha resp" x1="810" y1="372" x2="334" y2="372" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="570" y="352" text-anchor="middle">último número = N</text>
+          <text class="t-d halo" x="570" y="366" text-anchor="middle">el servidor usa N + 1</text>
+
+          <!-- 5 -->
+          <g class="num"><circle cx="348" cy="418" r="9"/><text x="348" y="422" text-anchor="middle">4</text></g>
+          <line class="flecha" x1="330" y1="444" x2="806" y2="444" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="570" y="424" text-anchor="middle">FECAESolicitar</text>
+          <text class="t-d halo" x="570" y="438" text-anchor="middle">número N + 1, importes, IVA, datos del receptor</text>
+
+          <line class="flecha resp" x1="810" y1="500" x2="334" y2="500" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="570" y="480" text-anchor="middle">Resultado A · CAE · CAEFchVto</text>
+          <text class="t-d halo" x="570" y="494" text-anchor="middle">o Resultado R con las observaciones</text>
+
+          <!-- 6 -->
+          <g class="nota"><rect x="215" y="522" width="230" height="40" rx="5"/><text x="330" y="539" text-anchor="middle">Guarda el comprobante</text><text x="330" y="554" text-anchor="middle">y arma el QR</text></g>
+          <g class="num"><circle cx="203" cy="542" r="9"/><text x="203" y="546" text-anchor="middle">5</text></g>
+
+          <!-- 7 -->
+          <g class="num"><circle cx="76" cy="610" r="9"/><text x="76" y="614" text-anchor="middle">6</text></g>
+          <line class="flecha resp" x1="326" y1="610" x2="104" y2="610" marker-end="url(#punta)"/>
+          <text class="t-m halo" x="215" y="590" text-anchor="middle" dx="14">Ticket con CAE y QR</text>
+          <text class="t-d halo" x="215" y="604" text-anchor="middle">se imprime o se muestra al cliente</text>
+        </svg>
+      </div>
+      <figcaption>Línea llena: pedido. Línea punteada: respuesta. En terracota lo que corre en RADAS, en verde azulado lo que corre en ARCA. El ticket de acceso (paso 2) se pide una vez cada 12 horas, no en cada cobro. Los pasos 3 y 4 de un mismo punto de venta y tipo se hacen de a uno por vez, para que la numeración salga correlativa.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="h-fallas">
+    <h2 id="h-fallas">Qué pasa si algo sale mal</h2>
+    <div class="tres">
+      <div class="caso"><span class="res ok">RESULTADO A</span><h3>Aprobada</h3><p>ARCA devuelve el <b>CAE</b> (código de 14 dígitos) y su fecha de vencimiento. Se guarda, se arma el QR y recién ahí se imprime. Puede venir con observaciones: se guardan igual.</p></div>
+      <div class="caso"><span class="res mal">RESULTADO R</span><h3>Rechazada</h3><p>El cobro ya está hecho y el comprobante <b>no se emitió</b>. La caja muestra el motivo que dio ARCA (por ejemplo un documento inválido), permite corregir el dato y reintentar. La cuenta queda marcada «cobrada, sin factura» hasta resolverlo.</p></div>
+      <div class="caso"><span class="res dud">SIN RESPUESTA</span><h3>Se cortó internet o ARCA no contestó</h3><p>Antes de reintentar se consulta con <code>FECompConsultar</code> si el número N + 1 ya se emitió. Reintentar a ciegas podría duplicar o saltear números. Cobrar no se bloquea: la factura se emite después.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-datos">
+    <h2 id="h-datos">Qué guardaría RADAS</h2>
+    <p class="sub">Una tabla nueva, <code>comprobante</code>, ligada a la cuenta cobrada. La carta y los precios no cambian.</p>
+    <div class="dos">
+      <div class="tabla">
+        <table>
+          <thead><tr><th>Campo</th><th>Qué es</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">id_pedido</td><td>La cuenta cobrada</td></tr>
+            <tr><td class="mono">tipo_cbte</td><td>Tipo de comprobante (tabla siguiente)</td></tr>
+            <tr><td class="mono">pto_vta · numero</td><td>Punto de venta y número. Únicos juntos con el tipo</td></tr>
+            <tr><td class="mono">fecha · cuit_emisor</td><td>Fecha de emisión y CUIT del bar</td></tr>
+            <tr><td class="mono">doc_tipo · doc_nro</td><td>Documento del cliente (o «consumidor final»)</td></tr>
+            <tr><td class="mono">cond_iva_receptor</td><td>Condición frente al IVA del cliente</td></tr>
+            <tr><td class="mono">neto · iva · total</td><td>Importes con 2 decimales</td></tr>
+            <tr><td class="mono">cae · cae_vto</td><td>Código de autorización y su vencimiento</td></tr>
+            <tr><td class="mono">resultado · observaciones</td><td>A o R, y lo que haya dicho ARCA</td></tr>
+            <tr><td class="mono">qr_url</td><td>La dirección que lleva el QR</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:grid; gap:.8rem">
+        <h3>Ejemplo de importes</h3>
+        <p class="sub">Un Negroni de $10.000 con el precio final con IVA incluido, a una alícuota del 21 %:</p>
+        <div class="tabla">
+          <table>
+            <tbody>
+              <tr><td>Total (el precio de la carta)</td><td class="num mono">10.000,00</td></tr>
+              <tr><td>Neto gravado (total ÷ 1,21)</td><td class="num mono">8.264,46</td></tr>
+              <tr><td>IVA 21 % (total − neto)</td><td class="num mono">1.735,54</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="sub">ARCA exige que el total sea exactamente la suma de neto, IVA y demás conceptos, así que el IVA se calcula como diferencia y no se redondea por separado.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-tipos">
+    <h2 id="h-tipos">Qué comprobante corresponde</h2>
+    <p class="sub">Depende de la situación del emisor frente al IVA. Para este proyecto se supone un bar <b>Responsable Inscripto</b>; si fuera monotributista emitiría solo factura C.</p>
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Cliente</th><th>Comprobante</th><th class="num">Código</th></tr></thead>
+        <tbody>
+          <tr><td>Consumidor final (la mayoría de las mesas)</td><td>Factura B</td><td class="num mono">6</td></tr>
+          <tr><td>Empresa con CUIT que pide discriminar IVA</td><td>Factura A</td><td class="num mono">1</td></tr>
+          <tr><td>El bar es monotributista (no aplica acá)</td><td>Factura C</td><td class="num mono">11</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">Los códigos son los de la tabla de ARCA (<code>FEParamGetTiposCbte</code>); conviene consultarla por el servicio y no dejarlos fijos. Además, el campo de condición de IVA del receptor figura como opcional desde abril de 2025 y pasa a ser obligatorio según la RG 5616: hay que verificar la fecha vigente antes de implementar.</p>
+  </section>
+
+  <section aria-labelledby="h-amb">
+    <h2 id="h-amb">Prueba y producción</h2>
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Servicio</th><th>Ambiente</th><th>Dirección</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag a">WSAA</span></td><td>Homologación (prueba)</td><td class="mono">https://wsaahomo.afip.gov.ar/ws/services/LoginCms</td></tr>
+          <tr><td><span class="tag a">WSAA</span></td><td>Producción</td><td class="mono">https://wsaa.afip.gov.ar/ws/services/LoginCms</td></tr>
+          <tr><td><span class="tag a">WSFEv1</span></td><td>Homologación (prueba)</td><td class="mono">https://wswhomo.afip.gov.ar/wsfev1/service.asmx</td></tr>
+          <tr><td><span class="tag a">WSFEv1</span></td><td>Producción</td><td class="mono">https://servicios1.afip.gov.ar/wsfev1/service.asmx</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">Un proyecto de estudiantes tendría que quedarse en <b>homologación</b>: el ambiente de prueba emite comprobantes sin valor fiscal. Las direcciones pueden cambiar; las vigentes están en el manual del desarrollador.</p>
+  </section>
+
+  <section aria-labelledby="h-qr">
+    <h2 id="h-qr">El QR del comprobante</h2>
+    <p>Cada comprobante lleva un QR que permite verificarlo en ARCA. Es una dirección con un solo parámetro <code>p</code>, que contiene los datos del comprobante en JSON codificado en Base64.</p>
+    <pre class="qr">https://www.arca.gob.ar/fe/qr/?p=&lt;JSON en Base64&gt;
+
+{ "ver": 1, "fecha": "AAAA-MM-DD", "cuit": 11 dígitos, "ptoVta": …,
+  "tipoCmp": …, "nroCmp": …, "importe": …, "moneda": "PES", "ctz": 1,
+  "tipoDocRec": …, "nroDocRec": …, "tipoCodAut": "E", "codAut": CAE }</pre>
+    <p class="sub">RADAS ya genera códigos QR por su cuenta (el de la carta, en <code>src/domain/qr.js</code>), pero esos códigos tienen un tope de 213 bytes y este contenido es más largo: habría que ampliar el generador antes de usarlo acá.</p>
+  </section>
+
+  <section aria-labelledby="h-codigo">
+    <h2 id="h-codigo">Dónde se tocaría el código</h2>
+    <ul class="lista">
+      <li><code>sql/schema.sql</code>: tabla <code>comprobante</code>. Sumarla a <code>TABLAS</code> del respaldo y las rutas nuevas a <code>ETIQUETAS</code> de la auditoría, o los tests fallan.</li>
+      <li><code>src/modules/facturacion/</code>: cliente de WSAA (firma del pedido con el certificado y guarda de Token y Sign), cliente de WSFEv1 y la lógica de emisión con su cola de a uno por vez.</li>
+      <li><code>src/domain/</code>: cálculo de neto e IVA, y armado del contenido del QR como funciones puras con pruebas.</li>
+      <li>Configuración por variables de entorno: CUIT, punto de venta, ruta del certificado y de la clave privada, y ambiente (prueba o producción). La clave privada nunca va al repositorio ni a las copias de seguridad.</li>
+      <li><code>web/src/pantallas/caja.jsx</code>: «Cobrar con factura», datos del cliente y reintento si ARCA rechaza.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Fuentes consultadas el 20/10/2026:</p>
+    <ul>
+      <li><a href="https://www.arca.gob.ar/ws/documentacion/manuales/manual-desarrollador-ARCA-COMPG.pdf">Manual para el desarrollador de WSFEv1 (RG 4291, versión 4.7)</a>: métodos, campos, ticket de acceso de 12 horas y direcciones de WSFEv1.</li>
+      <li><a href="https://www.arca.gob.ar/ws/documentacion/wsaa.asp">WSAA, autenticación y autorización</a>: direcciones de LoginCms y trámite del certificado.</li>
+      <li><a href="https://www.arca.gob.ar/fe/qr/default.asp">Código QR en comprobantes electrónicos</a> y sus especificaciones.</li>
+    </ul>
+  </footer>
+</main>

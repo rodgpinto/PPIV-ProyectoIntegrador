@@ -1,0 +1,28 @@
+# Blueprint de Render para RADAS (plan gratuito). Pasos en docs/DESPLIEGUE.md.
+# La base de datos no va en Render (la gratuita vence a los 30 días): se usa Neon y su dirección se carga en DATABASE_URL.
+services:
+  - type: web
+    name: radas
+    runtime: node
+    plan: free
+    region: ohio
+    # --include=dev: la interfaz se compila con esbuild y React, que están como dependencias de desarrollo
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/salud
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DB_POOL_MAX
+        value: "3"
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_NOMBRE
+        value: Administrador
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

@@ -1,0 +1,32 @@
+# OPCIONAL, para PROBAR en una computadora: app + PostgreSQL con un comando. Sin probar en el entorno donde se armó.
+#   cp .env.example .env   (completar ADMIN_EMAIL y ADMIN_PASSWORD)
+#   docker compose up -d --build        →  http://localhost:3000
+# Para dejarlo funcionando de verdad (HTTPS, reinicio automático) usar docker-compose.prod.yml: ver docs/DESPLIEGUE.md
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: radas
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cambiar-esta-clave}
+      POSTGRES_DB: radas
+    command: ["postgres", "-c", "max_connections=20", "-c", "shared_buffers=64MB"]
+    volumes: [datos:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radas"]
+      interval: 5s
+      retries: 10
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://radas:${DB_PASSWORD:-cambiar-esta-clave}@db:5432/radas
+    volumes: [respaldos:/datos/respaldos]
+    ports: ["3000:3000"]
+volumes:
+  datos:
+  respaldos:

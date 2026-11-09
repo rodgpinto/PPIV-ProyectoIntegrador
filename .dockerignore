@@ -1,0 +1,8 @@
+node_modules
+public
+.data
+.env
+.git
+docs
+test
+deploy

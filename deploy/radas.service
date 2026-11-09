@@ -1,0 +1,26 @@
+# Servicio de systemd para correr RADAS SIN Docker (Linux). Instalación completa en docs/DESPLIEGUE.md, "Sin Docker".
+#   sudo cp deploy/radas.service /etc/systemd/system/radas.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now radas
+#   journalctl -u radas -f        ← ver lo que va escribiendo
+# Ajustar User y las rutas si el proyecto está en otra carpeta. Sin probar en el entorno donde se armó.
+[Unit]
+Description=RADAS - sistema de gestión
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=radas
+WorkingDirectory=/opt/radas
+EnvironmentFile=/opt/radas/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node --max-old-space-size=192 src/server.js
+Restart=always
+RestartSec=5
+# Endurecimiento básico
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/opt/radas/.data
+
+[Install]
+WantedBy=multi-user.target

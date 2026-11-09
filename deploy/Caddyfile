@@ -1,0 +1,5 @@
+# Caddy pide y renueva solo el certificado HTTPS del dominio (necesita que los puertos 80 y 443 lleguen a este servidor).
+{$DOMINIO} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}
